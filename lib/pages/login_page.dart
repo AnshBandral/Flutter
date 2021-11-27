@@ -9,11 +9,20 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String name = "";
   bool changeButton = false;
-  
-  final _formKey=GlobalKey<FormState>();
-  moveToHome(BuildContext context)
-{}
- 
+
+  final _formKey = GlobalKey<FormState>();
+  moveToHome(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        changeButton = true;
+      });
+      await Future.delayed(Duration(seconds: 1));
+      await Navigator.pushNamed(context, MyRoutes.homeRoute);
+      setState(() {
+        changeButton = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +31,6 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
-            
             child: Column(
               children: [
                 Image.asset(
@@ -47,6 +55,12 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         decoration: InputDecoration(
                             hintText: " Enter UserName", labelText: "UserName"),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "UserName cannot be empty";
+                          }
+                          return null;
+                        },
                         onChanged: (value) {
                           name = value;
                           setState(() {});
@@ -56,6 +70,14 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: true,
                         decoration: InputDecoration(
                             hintText: "Enter Password", labelText: "Password"),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return "Password cannot be empty";
+                          } else if (value.length < 6) {
+                            return "Password length should be atleast 6";
+                          }
+                          return null;
+                        },
                       ),
                       SizedBox(
                         height: 20,
@@ -65,17 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius:
                             BorderRadius.circular(changeButton ? 20 : 8),
                         child: InkWell(
-                          onTap: () async {
-                            setState(() {
-                              changeButton = true;
-                            });
-                            await Future.delayed(Duration(seconds: 1));
-                            await Navigator.pushNamed(
-                                context, MyRoutes.homeRoute);
-                            setState(() {
-                              changeButton = false;
-                            });
-                          },
+                          onTap: () => moveToHome(context),
                           child: AnimatedContainer(
                             duration: Duration(seconds: 1),
                             width: changeButton ? 50 : 150,
