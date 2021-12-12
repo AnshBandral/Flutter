@@ -1,19 +1,58 @@
-import 'package:ecommerce/widgets/drawer.dart';
-import 'package:flutter/material.dart';
+import 'package:ecommerce/models/catalog.dart';
+import 'package:ecommerce/widgets/home_widgets/catalog_header.dart';
+import 'package:ecommerce/widgets/home_widgets/catalog_list.dart';
 
-class HomePage extends StatelessWidget {
+import 'package:ecommerce/widgets/themes.dart';
+import 'dart:convert';
+import 'dart:core';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:velocity_x/velocity_x.dart';
+
+class HomePage extends StatefulWidget {
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  loadData() async {
+    await Future.delayed(Duration(seconds: 2));
+    final catalogJson =
+        await rootBundle.loadString("assets/files/catalog.json");
+    final decodedData = jsonDecode(catalogJson);
+    var productsData = decodedData["products"];
+    CatalogModel.items = List.from(productsData)
+        .map<Item>((item) => Item.fromMap(item))
+        .toList();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Catalog App"),
-      ),
-      body: Center(
+      backgroundColor: MyTheme.creamColor,
+      body: SafeArea(
         child: Container(
-          child: Text("Welcome to flutter"),
+          padding: Vx.m32,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CatalogHeader(),
+              if (CatalogModel.items != null && CatalogModel.items.isNotEmpty)
+                CatalogList().py16().expand()
+              else
+                CircularProgressIndicator().centered().py16().expand(),
+            ],
+          ),
         ),
       ),
-      drawer: MyDrawer(),
     );
   }
 }
